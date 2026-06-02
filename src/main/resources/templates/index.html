@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная панель</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null}">
+    <div class="container">
+        <header>
+            <h1>Система учета товаров</h1>
+            <div class="user-info">
+                <span th:text="${employee.name}">Имя сотрудника</span>
+                <span th:if="${employee.shopAddress != null}" class="shop-address">
+            <span th:text="${employee.shopAddress}">Адрес магазина</span>
+        </span>
+                <span th:class="'role-badge role-' + ${employee.role}">
+            <span th:text="${employee.role}">CASHIER</span>
+        </span>
+                <a href="/logout" class="logout-btn">Выйти</a>
+            </div>
+        </header>
+
+        <nav class="main-menu">
+            <!-- ВСЕ РОЛИ -->
+            <a href="/products" class="menu-item">
+                <h3>Товары</h3>
+                <p>Просмотр списка товаров и остатков</p>
+            </a>
+
+            <a href="/buys/create" class="menu-item">
+                <h3>Создать чек</h3>
+                <p>Оформление покупки</p>
+            </a>
+
+            <a href="/buys/history" class="menu-item">
+                <h3>История продаж</h3>
+                <p>Просмотр чеков</p>
+            </a>
+
+            <!-- MANAGER и ADMIN -->
+            <th:block th:if="${employee.isManager()}">
+                <a href="/reports" class="menu-item manager-only">
+                    <h3>Отчеты</h3>
+                    <p>Отчеты по продажам</p>
+                </a>
+
+                <a href="/discounts" class="menu-item manager-only">
+                    <h3>Скидки</h3>
+                    <p>Управление скидками</p>
+                </a>
+            </th:block>
+
+            <!-- Только ADMIN -->
+            <th:block th:if="${employee.isAdmin()}">
+                <a href="/employees" class="menu-item admin-only">
+                    <h3>Сотрудники</h3>
+                    <p>Управление сотрудниками</p>
+                </a>
+
+                <a href="/categories" class="menu-item admin-only">
+                    <h3>Категории</h3>
+                    <p>Управление категориями товаров</p>
+                </a>
+
+                <a href="/admin/products" class="menu-item admin-only">
+                    <h3>Управление товарами</h3>
+                    <p>Добавление, изменение, удаление товаров</p>
+                </a>
+
+                <a href="/shops" class="menu-item admin-only">
+                    <h3>Магазины</h3>
+                    <p>Управление магазинами сети</p>
+                </a>
+            </th:block>
+        </nav>
+    </div>
+</th:block>
+</body>
+</html>

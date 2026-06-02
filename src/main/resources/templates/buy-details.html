@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Чек #<span th:text="${buy.id}"></span></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Чек #<span th:text="${buy.id}"></span></h1>
+    <div class="user-info">
+      <span th:text="${employee.name}">Имя</span>
+      <span th:if="${employee.shopAddress != null}" class="shop-address">
+            <span th:text="${employee.shopAddress}">Адрес</span>
+        </span>
+      <a href="/buys/history" class="back-btn">← Назад к истории</a>
+    </div>
+  </header>
+
+  <div class="buy-details">
+    <div class="buy-info-card">
+      <div class="info-row">
+        <span class="label">Номер чека:</span>
+        <span class="value" th:text="${buy.id}"></span>
+      </div>
+      <div class="info-row">
+        <span class="label">Дата и время:</span>
+        <span class="value" th:text="${#temporals.format(buy.createdAt, 'dd.MM.yyyy HH:mm:ss')}"></span>
+      </div>
+      <div class="info-row">
+        <span class="label">Магазин:</span>
+        <span class="value" th:text="${buy.shopId}"></span>
+      </div>
+      <div class="info-row total">
+        <span class="label">Общая сумма:</span>
+        <span class="value" th:text="${#numbers.formatDecimal(buy.sum, 0, 'COMMA', 2, 'POINT')} + ' руб.'"></span>
+      </div>
+    </div>
+
+    <div class="products-table">
+      <h3>Товары в чеке</h3>
+      <table>
+        <thead>
+        <tr>
+          <th>№</th>
+          <th>Наименование</th>
+          <th>Цена за ед.</th>
+          <th>Количество</th>
+          <th>Скидка</th>
+          <th>Сумма</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product, iterStat : ${buy.products}">
+          <td th:text="${iterStat.index + 1}">1</td>
+          <td>
+            <span th:text="${product.productName}">Товар</span>
+            <th:block th:if="${product.discountPercent > 0}">
+              <br>
+              <span class="discount-info">
+                (скидка <span th:text="${product.discountPercent}"></span>%
+                на момент покупки <span th:text="${#temporals.format(buy.createdAt, 'dd.MM.yyyy HH:mm')}"></span>)
+            </span>
+            </th:block>
+          </td>
+          <td th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 2, 'POINT')} + ' руб.'">0 руб.</td>
+          <td th:text="${product.count}">0</td>
+          <td>
+            <th:block th:if="${product.discountPercent > 0}">
+              <span class="discount-badge">-<span th:text="${product.discountPercent}"></span>%</span>
+              <br>
+              <span class="discount-amount">
+                (-<span th:text="${#numbers.formatDecimal(product.discountAmount, 0, 'COMMA', 2, 'POINT')}"></span> руб.)
+            </span>
+            </th:block>
+            <th:block th:unless="${product.discountPercent > 0}">
+              <span class="no-discount">Нет</span>
+            </th:block>
+          </td>
+          <td>
+            <th:block th:if="${product.discountPercent > 0}">
+              <div>
+                <span class="original-price" th:text="${#numbers.formatDecimal(product.totalPrice, 0, 'COMMA', 2, 'POINT')} + ' руб.'"></span>
+              </div>
+              <div>
+                <span class="discounted-price" th:text="${#numbers.formatDecimal(product.finalPrice, 0, 'COMMA', 2, 'POINT')} + ' руб.'"></span>
+              </div>
+            </th:block>
+            <th:block th:unless="${product.discountPercent > 0}">
+              <span th:text="${#numbers.formatDecimal(product.totalPrice, 0, 'COMMA', 2, 'POINT')} + ' руб.'"></span>
+            </th:block>
+          </td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr class="total-row">
+          <td colspan="5"><strong>Итого:</strong></td>
+          <td>
+            <strong th:text="${#numbers.formatDecimal(buy.sum, 0, 'COMMA', 2, 'POINT')} + ' руб.'">179.90 руб.</strong>
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="actions">
+      <button onclick="window.print()" class="print-btn">Распечатать чек</button>
+      <a href="/buys/history" class="back-link">← Вернуться к истории продаж</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

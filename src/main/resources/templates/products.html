@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Товары</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null}">
+    <div class="container">
+        <header>
+            <h1>Список товаров</h1>
+            <div class="user-info">
+                <span th:text="${employee.name}">Имя</span>
+                <span th:if="${employee.shopAddress != null}" class="shop-address">
+                        <span th:text="${employee.shopAddress}"></span>
+                    </span>
+                <a href="/" class="back-btn">На главную</a>
+            </div>
+        </header>
+
+        <th:block th:if="${isAdmin}">
+            <div class="shop-selector">
+                <div class="shop-buttons">
+                    <a th:each="shop : ${shops}"
+                       th:href="@{/products(shopId=${shop.id}, categoryId=${selectedCategory})}"
+                       th:class="${shop.id == selectedShopId} ? 'shop-btn active' : 'shop-btn'">
+                        <span th:text="${shop.address}"></span>
+                    </a>
+                </div>
+            </div>
+        </th:block>
+
+        <div class="shop-info-bar" th:if="${shopAddress != null}">
+            <span th:text="${shopAddress}"></span>
+        </div>
+
+        <div class="filters">
+            <a th:href="@{/products(shopId=${selectedShopId})}"
+               th:classappend="${selectedCategory == null} ? 'active'">Все</a>
+            <a th:each="category : ${categories}"
+               th:href="@{/products(categoryId=${category.id}, shopId=${selectedShopId})}"
+               th:text="${category.name}"
+               th:classappend="${selectedCategory == category.id} ? 'active'"></a>
+        </div>
+
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Название</th>
+                <th>Категория</th>
+                <th>Цена</th>
+                <th>Ед. изм.</th>
+                <th>Остаток</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products}"
+                th:class="${product.availableCount == 0} ? 'out-of-stock' : (${product.availableCount < 10} ? 'low-stock' : '')">
+                <td th:text="${product.name}"></td>
+                <td th:text="${product.categoryName}"></td>
+                <td th:text="${product.price} + ' руб.'"></td>
+                <td th:text="${product.unit}"></td>
+                <td>
+                            <span th:text="${product.availableCount}"></span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</th:block>
+</body>
+</html>

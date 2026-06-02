@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Добавить магазин</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null}">
+  <div class="container">
+    <header>
+      <h1>Добавить магазин</h1>
+      <div class="user-info">
+        <span th:text="${employee.name}"></span>
+        <a href="/shops" class="back-btn">← Назад</a>
+      </div>
+    </header>
+
+    <div class="form-container">
+      <form th:action="@{/shops/create}" method="post">
+        <div class="form-group">
+          <label>Адрес магазина:</label>
+          <input type="text" name="address" required
+                 placeholder="ул. Ленина, 15">
+          <small>Укажите полный адрес магазина</small>
+        </div>
+
+        <button type="submit" class="btn-primary">Добавить магазин</button>
+      </form>
+    </div>
+  </div>
+</th:block>
+</body>
+</html>

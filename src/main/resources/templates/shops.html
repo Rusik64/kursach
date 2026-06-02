@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Управление магазинами</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null}">
+  <div class="container">
+    <header>
+      <h1>Управление магазинами</h1>
+      <div class="user-info">
+        <span th:text="${employee.name}"></span>
+        <a href="/" class="back-btn">На главную</a>
+      </div>
+    </header>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="actions-bar">
+      <a href="/shops/create" class="btn-primary">+ Добавить магазин</a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(shops)}" class="empty-message">
+      <p>Магазины отсутствуют</p>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(shops)}" class="shops-grid">
+      <div th:each="shop : ${shops}" class="shop-card">
+        <div class="shop-card-header">
+          <h3 th:text="'Магазин #' + ${shop.get('id')}"></h3>
+          <span class="shop-status status-active">Активен</span>
+        </div>
+        <div class="shop-card-body">
+          <p class="shop-address">
+            <strong>Адрес:</strong>
+            <span th:text="${shop.get('address')}"></span>
+          </p>
+          <div class="shop-stats">
+            <div class="stat-item">
+              <span class="stat-label">Сотрудников:</span>
+              <span class="stat-value" th:text="${shop.get('employeeCount')}">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Товаров:</span>
+              <span class="stat-value" th:text="${shop.get('productCount')}">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="shop-card-footer">
+          <a th:href="@{/shops/edit/{id}(id=${shop.get('id')})}" class="btn-edit">Изменить</a>
+          <form th:action="@{/shops/delete/{id}(id=${shop.get('id')})}"
+                method="post"
+                style="display: inline;"
+                onsubmit="return confirm('Удалить магазин? Это действие нельзя отменить.')">
+            <button type="submit" class="btn-danger"
+                    th:disabled="${shop.get('employeeCount') > 0}">
+              Удалить
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</th:block>
+</body>
+</html>

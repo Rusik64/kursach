@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Создание чека</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Оформление покупки</h1>
+        <div class="user-info">
+            <span th:text="${employee.name}">Имя</span>
+            <span th:if="${employee.shopAddress != null}" class="shop-address">
+                    <span th:text="${employee.shopAddress}">Адрес</span>
+                </span>
+            <a href="/" class="back-btn">На главную</a>
+        </div>
+    </header>
+
+    <div class="buy-form">
+        <div class="product-search">
+            <input type="text" id="productSearch" placeholder="Поиск товара...">
+            <select id="productList" size="10">
+                <option th:each="product : ${products}"
+                        th:value="${product.id}"
+                        th:data-name="${product.name}"
+                        th:data-price="${product.price}"
+                        th:data-stock="${product.availableCount}"
+                        th:text="${product.name} + ' (' + ${product.price} + ' руб., остаток: ' + ${product.availableCount} + ')'">
+                </option>
+            </select>
+            <div class="add-product-form">
+                <input type="number" id="productCount" placeholder="Количество" min="1" value="1">
+                <button onclick="addProduct()" class="btn-add">Добавить</button>
+            </div>
+        </div>
+
+        <div class="selected-products">
+            <h3>Выбранные товары</h3>
+            <table id="buyItems">
+                <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Цена</th>
+                    <th>Количество</th>
+                    <th>Сумма</th>
+                    <th>Действие</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="total">
+                <strong>Итого: <span id="totalSum">0.00</span> руб.</strong>
+            </div>
+            <button onclick="submitBuy()" class="btn-primary">Оформить чек</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/buy.js"></script>
+</body>
+</html>

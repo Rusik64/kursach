@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Управление категориями</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null}">
+  <div class="container">
+    <header>
+      <h1>Управление категориями</h1>
+      <div class="user-info">
+        <span th:text="${employee.name}"></span>
+        <a href="/" class="back-btn">На главную</a>
+      </div>
+    </header>
+
+    <!-- Сообщения -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="actions-bar">
+      <a href="/categories/create" class="btn-primary">+ Добавить категорию</a>
+    </div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Действия</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="category : ${categories}">
+        <td th:text="${category.id}"></td>
+        <td th:text="${category.name}"></td>
+        <td class="actions">
+          <a th:href="@{/categories/edit/{id}(id=${category.id})}"
+             class="btn-edit">Изменить</a>
+          <form th:action="@{/categories/delete/{id}(id=${category.id})}"
+                method="post"
+                style="display: inline;"
+                onsubmit="return confirm('Удалить категорию? Товары этой категории будут без категории.')">
+            <button type="submit" class="btn-danger">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</th:block>
+</body>
+</html>

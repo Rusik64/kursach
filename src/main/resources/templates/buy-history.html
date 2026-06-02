@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>История продаж</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>История продаж</h1>
+        <div class="user-info">
+            <span th:text="${employee.name}">Имя</span>
+            <span th:if="${employee.shopAddress != null}" class="shop-address">
+            <span th:text="${employee.shopAddress}">Адрес</span>
+        </span>
+            <a href="/" class="back-btn">На главную</a>
+        </div>
+    </header>
+
+    <div class="buy-history">
+        <div th:if="${#lists.isEmpty(buys)}" class="empty-message">
+            <p>История продаж пуста</p>
+        </div>
+
+        <div th:each="buy : ${buys}" class="buy-card clickable"
+             th:onclick="'window.location.href=\'/buys/' + ${buy.id} + '\''">
+
+            <div class="buy-header">
+                <div class="buy-number">
+                    <span class="check-number">Чек #<span th:text="${buy.id}"></span></span>
+                </div>
+                <div class="buy-date" th:text="${#temporals.format(buy.createdAt, 'dd.MM.yyyy HH:mm')}">
+                    17.05.2026 16:10
+                </div>
+                <div class="buy-sum">
+                    <strong th:text="${#numbers.formatDecimal(buy.sum, 0, 'COMMA', 2, 'POINT')} + ' руб.'">
+                        179.90 руб.
+                    </strong>
+                </div>
+            </div>
+
+            <div class="buy-footer">
+                <span class="view-details">Нажмите для подробностей →</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/history.js"></script>
+</body>
+</html>

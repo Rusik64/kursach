@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Изменить магазин</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null && shop != null}">
+  <div class="container">
+    <header>
+      <h1>Изменить магазин #<span th:text="${shop.id}"></span></h1>
+      <div class="user-info">
+        <span th:text="${employee.name}"></span>
+        <a href="/shops" class="back-btn">← Назад</a>
+      </div>
+    </header>
+
+    <div class="form-container">
+      <form th:action="@{/shops/edit/{id}(id=${shop.id})}" method="post">
+        <div class="form-group">
+          <label>Адрес магазина:</label>
+          <input type="text" name="address" th:value="${shop.address}" required>
+          <small>Укажите полный адрес магазина</small>
+        </div>
+
+        <button type="submit" class="btn-primary">Сохранить изменения</button>
+      </form>
+    </div>
+  </div>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчет по продажам</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null && report != null}">
+    <div class="container">
+        <header>
+            <h1>Отчет по продажам</h1>
+            <div class="user-info">
+                <span th:text="${employee.name}">Имя</span>
+                <span th:if="${employee.shopAddress != null}" class="shop-address">
+            <span th:text="${employee.shopAddress}">Адрес</span>
+        </span>
+                <div class="header-actions">
+                    <a th:if="${reportType != 'products'}"
+                       th:href="@{/reports/sales(startDate=${#temporals.format(startDate, 'yyyy-MM-dd')}, endDate=${#temporals.format(endDate, 'yyyy-MM-dd')}, type='products', shopId=${selectedShopId})}"
+                       class="btn-secondary">По товарам</a>
+                    <a th:if="${reportType == 'products'}"
+                       th:href="@{/reports/sales(startDate=${#temporals.format(startDate, 'yyyy-MM-dd')}, endDate=${#temporals.format(endDate, 'yyyy-MM-dd')}, type='summary', shopId=${selectedShopId})}"
+                       class="btn-secondary">Сводный отчет</a>
+                    <a href="/reports" class="back-btn">← Назад к отчетам</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="report-results">
+            <!-- Информация о периоде -->
+            <div class="report-info">
+                <h2 th:if="${isAllShops}">Отчет по всем магазинам</h2>
+                <h2 th:unless="${isAllShops}" th:text="'Отчет по магазину #' + ${selectedShopId}"></h2>
+                <p>
+                    <strong th:text="${#temporals.format(startDate, 'dd.MM.yyyy')}"></strong> -
+                    <strong th:text="${#temporals.format(endDate, 'dd.MM.yyyy')}"></strong>
+                </p>
+            </div>
+
+            <!-- Основные показатели (для сводного отчета) -->
+            <th:block th:if="${reportType != 'products'}">
+                <div class="report-summary-detailed">
+                    <div class="summary-card">
+                        <h4>Всего чеков</h4>
+                        <p class="big-number" th:text="${report.get('totalChecks') != null ? report.get('totalChecks') : 0}">0</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Общая выручка</h4>
+                        <p class="big-number" th:text="${report.get('totalRevenue') != null ? report.get('totalRevenue') : 0} + ' руб.'">0 руб.</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Средний чек</h4>
+                        <p class="big-number" th:text="${report.get('averageCheck') != null ? report.get('averageCheck') : 0} + ' руб.'">0 руб.</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Продано товаров</h4>
+                        <p class="big-number" th:text="${report.get('totalProductsSold') != null ? report.get('totalProductsSold') : 0} + ' ед.'">0 ед.</p>
+                    </div>
+                </div>
+            </th:block>
+
+            <!-- Основные показатели (для отчета по товарам) -->
+            <th:block th:if="${reportType == 'products'}">
+                <div class="report-summary-detailed">
+                    <div class="summary-card">
+                        <h4>Всего товаров</h4>
+                        <p class="big-number" th:text="${report.get('totalQuantity') != null ? report.get('totalQuantity') : 0} + ' ед.'">0 ед.</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Общая сумма</h4>
+                        <p class="big-number" th:text="${report.get('totalAmount') != null ? report.get('totalAmount') : 0} + ' руб.'">0 руб.</p>
+                    </div>
+                </div>
+            </th:block>
+
+            <!-- Статистика по магазинам (для отчета по всем магазинам) -->
+            <th:block th:if="${report.containsKey('shopsStats') && !#lists.isEmpty(report.get('shopsStats'))}">
+                <div class="report-section">
+                    <h3>Статистика по магазинам</h3>
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Магазин</th>
+                            <th>Чеков</th>
+                            <th>Выручка</th>
+                            <th>Средний чек</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="shop : ${report.get('shopsStats')}">
+                            <td th:text="${shop.get('address')}"></td>
+                            <td th:text="${shop.get('checks_count')}"></td>
+                            <td th:text="${#numbers.formatDecimal(shop.get('total_revenue'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                            <td th:text="${#numbers.formatDecimal(shop.get('average_check'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+
+            <!-- Топ-10 товаров -->
+            <th:block th:if="${report.containsKey('topProducts') && !#lists.isEmpty(report.get('topProducts'))}">
+                <div class="report-section">
+                    <h3>Топ-10 товаров по выручке</h3>
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Товар</th>
+                            <th>Цена</th>
+                            <th>Продано</th>
+                            <th>Выручка</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="product, iterStat : ${report.get('topProducts')}">
+                            <td th:text="${iterStat.index + 1}"></td>
+                            <td th:text="${product.get('name')}"></td>
+                            <td th:text="${#numbers.formatDecimal(product.get('price'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                            <td th:text="${product.get('total_count')} + ' ' + ${product.get('unit')}"></td>
+                            <td th:text="${#numbers.formatDecimal(product.get('total_revenue'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+
+            <!-- Все проданные товары (для сводного отчета) -->
+            <th:block th:if="${report.containsKey('soldProducts') && !#lists.isEmpty(report.get('soldProducts'))}">
+                <div class="report-section">
+                    <h3>Все проданные товары</h3>
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Цена за ед.</th>
+                            <th>Количество</th>
+                            <th>Сумма</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="product : ${report.get('soldProducts')}">
+                            <td th:text="${product.get('name')}"></td>
+                            <td th:text="${#numbers.formatDecimal(product.get('price_per_unit'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                            <td>
+                                <span class="quantity-badge" th:text="${product.get('total_count')} + ' ' + ${product.get('unit')}"></span>
+                            </td>
+                            <td th:text="${#numbers.formatDecimal(product.get('total_revenue'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+
+            <!-- Детальный отчет по товарам (для отчета по товарам) -->
+            <th:block th:if="${report.containsKey('products') && !#lists.isEmpty(report.get('products'))}">
+                <div class="report-section">
+                    <h3>Проданные товары</h3>
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Цена</th>
+                            <th>Продано</th>
+                            <th>Сумма</th>
+                            <th>Чеков</th>
+                            <th th:if="${isAllShops}">Магазинов</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="product : ${report.get('products')}">
+                            <td th:text="${product.get('name')}"></td>
+                            <td th:text="${#numbers.formatDecimal(product.get('unit_price'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                            <td th:text="${product.get('quantity')} + ' ' + ${product.get('unit')}"></td>
+                            <td th:text="${#numbers.formatDecimal(product.get('total_amount'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                            <td th:text="${product.get('checks_count')}"></td>
+                            <td th:if="${isAllShops}" th:text="${product.get('shops_count')}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+
+            <!-- Продажи по категориям -->
+            <th:block th:if="${report.containsKey('salesByCategory') && !#lists.isEmpty(report.get('salesByCategory'))}">
+                <div class="report-section">
+                    <h3>Продажи по категориям</h3>
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Категория</th>
+                            <th>Продано</th>
+                            <th>Выручка</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="category : ${report.get('salesByCategory')}">
+                            <td th:text="${category.get('name')}"></td>
+                            <td th:text="${category.get('total_quantity')} + ' ед.'"></td>
+                            <td th:text="${#numbers.formatDecimal(category.get('total_revenue'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+
+            <!-- Почасовая статистика -->
+            <th:block th:if="${report.containsKey('salesByHour') && !#lists.isEmpty(report.get('salesByHour'))}">
+                <div class="report-section">
+                    <h3>Продажи по часам</h3>
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Час</th>
+                            <th>Чеков</th>
+                            <th>Выручка</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="hour : ${report.get('salesByHour')}">
+                            <td th:text="${hour.get('hour')} + ':00'"></td>
+                            <td th:text="${hour.get('checks_count')}"></td>
+                            <td th:text="${#numbers.formatDecimal(hour.get('total_sales'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+
+            <!-- Сводка по дням -->
+            <th:block th:if="${report.containsKey('dailySummary') && !#lists.isEmpty(report.get('dailySummary'))}">
+                <div class="report-section">
+                    <h3>Сводка по дням</h3>
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Чеков</th>
+                            <th>Выручка</th>
+                            <th>Средний чек</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="day : ${report.get('dailySummary')}">
+                            <td th:text="${day.get('sale_date')}"></td>
+                            <td th:text="${day.get('checks_count')}"></td>
+                            <td th:text="${#numbers.formatDecimal(day.get('daily_revenue'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                            <td th:text="${#numbers.formatDecimal(day.get('average_check'), 0, 'COMMA', 2, 'POINT')} + ' руб.'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+
+            <!-- Пустой отчет -->
+            <th:block th:if="${report.get('totalChecks') == null || report.get('totalChecks') == 0}">
+                <div th:if="${report.get('totalQuantity') == null || report.get('totalQuantity') == 0}"
+                     class="empty-message">
+                    <p>За выбранный период продаж не было</p>
+                </div>
+            </th:block>
+
+            <!-- Действия -->
+            <div class="report-actions">
+                <button onclick="window.print()" class="btn-primary">Распечатать отчет</button>
+                <a href="/reports" class="btn-secondary">Новый отчет</a>
+            </div>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

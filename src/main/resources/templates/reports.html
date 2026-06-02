@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчеты</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null}">
+    <div class="container">
+        <header>
+            <h1>Отчеты по продажам</h1>
+            <div class="user-info">
+                <span th:text="${employee.name}">Имя</span>
+                <span th:if="${employee.shopAddress != null}" class="shop-address">
+            <span th:text="${employee.shopAddress}">Адрес</span>
+        </span>
+                <a href="/" class="back-btn">На главную</a>
+            </div>
+        </header>
+
+        <div class="reports-content">
+            <!-- Форма для отчета за период -->
+            <div class="report-card">
+                <h3>Отчет за период</h3>
+                <form th:action="@{/reports/sales}" method="get" class="report-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Начальная дата:</label>
+                            <input type="date" name="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Конечная дата:</label>
+                            <input type="date" name="endDate" required>
+                        </div>
+
+                        <!-- Выбор магазина для ADMIN -->
+                        <div class="form-group" th:if="${isAdmin}">
+                            <label>Магазин:</label>
+                            <select name="shopId">
+                                <option value="0">Все магазины</option>
+                                <option value="1">Магазин #1 - ул. Ленина, 15</option>
+                                <option value="2">Магазин #2 - пр. Мира, 42</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-primary">Сформировать отчет</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Быстрые ссылки -->
+            <div class="quick-reports">
+                <h3>Быстрые отчеты</h3>
+                <div class="quick-links">
+                    <a th:href="@{/reports/sales(startDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}, shopId=${employee.isAdmin() ? '0' : ''})}"
+                       class="quick-link">За сегодня</a>
+                    <a th:href="@{/reports/sales(startDate=${#temporals.format(#temporals.createToday().minusDays(7), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}, shopId=${employee.isAdmin() ? '0' : ''})}"
+                       class="quick-link">За неделю</a>
+                    <a th:href="@{/reports/sales(startDate=${#temporals.format(#temporals.createToday().withDayOfMonth(1), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}, shopId=${employee.isAdmin() ? '0' : ''})}"
+                       class="quick-link">За месяц</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

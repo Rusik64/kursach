@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Управление остатками</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null && product != null}">
+    <div class="container">
+        <header>
+            <h1>Управление остатками: <span th:text="${product.name}"></span></h1>
+            <div class="user-info">
+                <span th:text="${employee.name}"></span>
+                <a href="/admin/products" class="back-btn">← Назад</a>
+            </div>
+        </header>
+
+        <div class="form-container">
+            <form th:action="@{/admin/products/stock/{productId}(productId=${product.id})}" method="post">
+                <div class="form-group">
+                    <label>Магазин:</label>
+                    <select name="shopId" required>
+                        <option value="1">Магазин #1 - ул. Ленина, 15</option>
+                        <option value="2">Магазин #2 - пр. Мира, 42</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Количество:</label>
+                    <input type="number" name="count" min="0" required placeholder="100">
+                </div>
+
+                <button type="submit" class="btn-primary">Обновить остаток</button>
+            </form>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

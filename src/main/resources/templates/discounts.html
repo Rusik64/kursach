@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Управление скидками</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null}">
+    <div class="container">
+        <header>
+            <h1>Управление скидками</h1>
+            <div class="user-info">
+                <span th:text="${employee.name}"></span>
+                <span th:if="${employee.shopAddress != null}" class="shop-address">
+                        <span th:text="${employee.shopAddress}"></span>
+                    </span>
+                <a href="/" class="back-btn">На главную</a>
+            </div>
+        </header>
+
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div class="actions-bar">
+            <a href="/discounts/create" class="btn-primary">+ Добавить скидку</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(discounts)}" class="empty-message">
+            <p>Скидки отсутствуют</p>
+        </div>
+
+        <table th:if="${!#lists.isEmpty(discounts)}" class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Тип</th>
+                <th>Товар/Категория</th>
+                <th>Процент</th>
+                <th>Период действия</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="discount : ${discounts}">
+                <td th:text="${discount.id}"></td>
+                <td>
+                    <span th:if="${discount.productId != null}" class="badge badge-product">На товар</span>
+                    <span th:if="${discount.categoryId != null}" class="badge badge-category">На категорию</span>
+                </td>
+                <td>
+                    <span th:if="${discount.productName != null}" th:text="${discount.productName}"></span>
+                    <span th:if="${discount.categoryName != null}" th:text="${discount.categoryName}"></span>
+                </td>
+                <td>
+                    <span class="discount-percent" th:text="${discount.percentage} + '%'"></span>
+                </td>
+                <td>
+                    <!-- Безопасное отображение дат -->
+                    <th:block th:if="${discount.startDate != null && discount.endDate != null}">
+                        <span th:text="${#temporals.format(discount.startDate, 'dd.MM.yyyy')}"></span>
+                        <span> - </span>
+                        <span th:text="${#temporals.format(discount.endDate, 'dd.MM.yyyy')}"></span>
+                    </th:block>
+                    <th:block th:unless="${discount.startDate != null && discount.endDate != null}">
+                        <span class="text-muted">Не указан</span>
+                    </th:block>
+                </td>
+                <td>
+                    <!-- Статус скидки -->
+                    <th:block th:if="${discount.active}">
+                        <span class="badge badge-active">Активна</span>
+                    </th:block>
+                    <th:block th:unless="${discount.active}">
+                        <th:block th:if="${discount.startDate != null && discount.endDate != null}">
+                                    <span th:if="${#temporals.createNow().isBefore(discount.startDate)}"
+                                          class="badge badge-future">Будущая</span>
+                            <span th:if="${#temporals.createNow().isAfter(discount.endDate)}"
+                                  class="badge badge-expired">Истекла</span>
+                        </th:block>
+                        <span th:unless="${discount.startDate != null && discount.endDate != null}"
+                              class="badge badge-unknown">Неизвестно</span>
+                    </th:block>
+                </td>
+                <td class="actions">
+                    <a th:href="@{/discounts/edit/{id}(id=${discount.id})}"
+                       class="btn-edit">Изменить</a>
+                    <form th:if="${employee.isAdmin()}"
+                          th:action="@{/discounts/delete/{id}(id=${discount.id})}"
+                          method="post"
+                          style="display: inline;"
+                          onsubmit="return confirm('Удалить скидку?')">
+                        <button type="submit" class="btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Изменить скидку</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<th:block th:if="${employee != null && discount != null}">
+  <div class="container">
+    <header>
+      <h1>Изменить скидку #<span th:text="${discount.id}"></span></h1>
+      <div class="user-info">
+        <span th:text="${employee.name}"></span>
+        <a href="/discounts" class="back-btn">← Назад</a>
+      </div>
+    </header>
+
+    <div class="form-container">
+      <div class="current-discount-info">
+        <p>Текущая скидка:
+          <strong th:if="${discount.productName != null}" th:text="${discount.productName}"></strong>
+          <strong th:if="${discount.categoryName != null}" th:text="${discount.categoryName}"></strong>
+          - <span class="discount-percent" th:text="${discount.percentage} + '%'"></span>
+        </p>
+      </div>
+
+      <form th:action="@{/discounts/edit/{id}(id=${discount.id})}" method="post">
+        <div class="form-group">
+          <label>Тип скидки:</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="discountType" value="product"
+                     th:checked="${discount.productId != null}"
+                     onchange="toggleFields('product')">
+              На конкретный товар
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="discountType" value="category"
+                     th:checked="${discount.categoryId != null}"
+                     onchange="toggleFields('category')">
+              На категорию товаров
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group" id="productField"
+             th:style="${discount.productId != null ? 'display:block' : 'display:none'}">
+          <label>Товар:</label>
+          <select name="productId">
+            <option value="">Выберите товар</option>
+            <option th:each="product : ${products}"
+                    th:value="${product.id}"
+                    th:text="${product.name} + ' (' + ${product.price} + ' руб.)'"
+                    th:selected="${product.id == discount.productId}"></option>
+          </select>
+        </div>
+
+        <div class="form-group" id="categoryField"
+             th:style="${discount.categoryId != null ? 'display:block' : 'display:none'}">
+          <label>Категория:</label>
+          <select name="categoryId">
+            <option value="">Выберите категорию</option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.id}"
+                    th:text="${category.name}"
+                    th:selected="${category.id == discount.categoryId}"></option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Процент скидки:</label>
+          <input type="number" name="percentage"
+                 th:value="${discount.percentage}"
+                 min="0.1" max="99.9" step="0.1" required>
+        </div>
+
+        <div class="form-group">
+          <label>Дата начала действия:</label>
+          <!-- Исправленный формат даты -->
+          <input type="datetime-local" name="startDate"
+                 th:value="${discount.startDate != null ? #temporals.format(discount.startDate, 'yyyy-MM-dd') + 'T' + #temporals.format(discount.startDate, 'HH:mm') : ''}"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>Дата окончания действия:</label>
+          <!-- Исправленный формат даты -->
+          <input type="datetime-local" name="endDate"
+                 th:value="${discount.endDate != null ? #temporals.format(discount.endDate, 'yyyy-MM-dd') + 'T' + #temporals.format(discount.endDate, 'HH:mm') : ''}"
+                 required>
+        </div>
+
+        <button type="submit" class="btn-primary">Сохранить изменения</button>
+      </form>
+    </div>
+  </div>
+</th:block>
+
+<script>
+  function toggleFields(type) {
+      const productField = document.getElementById('productField');
+      const categoryField = document.getElementById('categoryField');
+
+      if (type === 'product') {
+          productField.style.display = 'block';
+          categoryField.style.display = 'none';
+      } else {
+          productField.style.display = 'none';
+          categoryField.style.display = 'block';
+      }
+  }
+</script>
+</body>
+</html>
